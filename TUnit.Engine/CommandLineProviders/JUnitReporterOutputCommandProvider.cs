@@ -4,9 +4,9 @@ using Microsoft.Testing.Platform.Extensions.CommandLine;
 
 namespace TUnit.Engine.CommandLineProviders;
 
-internal class JUnitReporterCommandProvider(IExtension extension) : ICommandLineOptionsProvider
+internal class JUnitReporterOutputCommandProvider(IExtension extension) : ICommandLineOptionsProvider
 {
-    public const string JUnitReporterOption = "report-junit";
+    public const string JUnitOutputPathOption = "junit-output-path";
 
     public Task<bool> IsEnabledAsync() => extension.IsEnabledAsync();
 
@@ -22,16 +22,23 @@ internal class JUnitReporterCommandProvider(IExtension extension) : ICommandLine
     {
         return
         [
-            new CommandLineOption(JUnitReporterOption, "Enable generating JUnit report", ArgumentArity.Zero, false)
+            new CommandLineOption(
+                JUnitOutputPathOption,
+                "Path to output JUnit XML file (default: TestResults/{AssemblyName}-junit.xml)",
+                ArgumentArity.ExactlyOne,
+                false)
         ];
     }
 
-    public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
+    public Task<ValidationResult> ValidateOptionArgumentsAsync(
+        CommandLineOption commandOption,
+        string[] arguments)
     {
         return ValidationResult.ValidTask;
     }
 
-    public Task<ValidationResult> ValidateCommandLineOptionsAsync(ICommandLineOptions commandLineOptions)
+    public Task<ValidationResult> ValidateCommandLineOptionsAsync(
+        ICommandLineOptions commandLineOptions)
     {
         return ValidationResult.ValidTask;
     }

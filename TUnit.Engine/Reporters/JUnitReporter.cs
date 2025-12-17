@@ -18,6 +18,12 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public async Task<bool> IsEnabledAsync()
     {
+        if (_isEnabled)
+        {
+            CheckOutputPath();
+            return await extension.IsEnabledAsync();
+        }
+
         // Check if explicitly disabled
         if (Environment.GetEnvironmentVariable("TUNIT_DISABLE_JUNIT_REPORTER") is not null)
         {
@@ -34,14 +40,16 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(_outputPath))
+        CheckOutputPath();
+        _isEnabled = true;
+        return await extension.IsEnabledAsync();
+
+        void CheckOutputPath()
         {
+            if (!string.IsNullOrEmpty(_outputPath)) return;
             _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
                           ?? GetDefaultOutputPath();
         }
-
-        _isEnabled = true;
-        return await extension.IsEnabledAsync();
     }
 
     public string Uid { get; } = $"{extension.Uid}JUnitReporter";
@@ -106,6 +114,11 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         _outputPath = path;
+    }
+
+    internal void Enable()
+    {
+        _isEnabled = true;
     }
 
     private static string GetDefaultOutputPath()

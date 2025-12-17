@@ -23,6 +23,7 @@ public static class TestApplicationBuilderExtensions
 
         var junitReporter = new JUnitReporter(extension);
         var junitReporterCommandProvider = new JUnitReporterCommandProvider(extension);
+        var junitReporterOutputCommandProvider = new JUnitReporterOutputCommandProvider(extension);
 
         testApplicationBuilder.RegisterTestFramework(
             serviceProvider => new TestFrameworkCapabilities(CreateCapabilities(serviceProvider)),
@@ -51,6 +52,7 @@ public static class TestApplicationBuilderExtensions
 
         // JUnit reporter configuration
         testApplicationBuilder.CommandLine.AddProvider(() => junitReporterCommandProvider);
+        testApplicationBuilder.CommandLine.AddProvider(() => junitReporterOutputCommandProvider);
 
         testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
         {
@@ -69,12 +71,24 @@ public static class TestApplicationBuilderExtensions
         {
             // Apply command-line configuration if provided
             var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
-            if (commandLineOptions.TryGetOptionArgumentList(JUnitReporterCommandProvider.JUnitOutputPathOption, out var pathArgs))
+            if (commandLineOptions.TryGetOptionArgumentList(JUnitReporterOutputCommandProvider.JUnitOutputPathOption, out var pathArgs))
             {
                 junitReporter.SetOutputPath(pathArgs[0]);
             }
             return junitReporter;
         });
+
+        testApplicationBuilder.TestHost.AddDataConsumer(serviceProvider =>
+        {
+            // Apply command-line configuration if provided
+            var commandLineOptions = serviceProvider.GetRequiredService<ICommandLineOptions>();
+            if (commandLineOptions.TryGetOptionArgumentList(JUnitReporterCommandProvider.JUnitReporterOption, out _))
+            {
+                junitReporter.Enable();
+            }
+            return junitReporter;
+        });
+
         testApplicationBuilder.TestHost.AddTestHostApplicationLifetime(_ => junitReporter);
     }
 
