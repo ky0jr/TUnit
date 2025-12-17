@@ -18,6 +18,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public async Task<bool> IsEnabledAsync()
     {
+        // Explicitly enabled from CLI Argument (Highest Priority)
         if (_isEnabled)
         {
             CheckOutputPath();
@@ -44,6 +45,7 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         _isEnabled = true;
         return await extension.IsEnabledAsync();
 
+        // Determine output path (only if not already set via command-line argument)
         void CheckOutputPath()
         {
             if (!string.IsNullOrEmpty(_outputPath)) return;
