@@ -18,6 +18,12 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
 
     public async Task<bool> IsEnabledAsync()
     {
+        if (_isEnabled)
+        {
+            CheckOutputPath();
+            return await extension.IsEnabledAsync();
+        }
+
         // Check if explicitly disabled
         if (Environment.GetEnvironmentVariable("TUNIT_DISABLE_JUNIT_REPORTER") is not null)
         {
@@ -34,15 +40,16 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
             return false;
         }
 
-        // Determine output path (only if not already set via command-line argument)
-        if (string.IsNullOrEmpty(_outputPath))
-        {
-            _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
-                ?? GetDefaultOutputPath();
-        }
-
+        CheckOutputPath();
         _isEnabled = true;
         return await extension.IsEnabledAsync();
+
+        void CheckOutputPath()
+        {
+            if (!string.IsNullOrEmpty(_outputPath)) return;
+            _outputPath = Environment.GetEnvironmentVariable("JUNIT_XML_OUTPUT_PATH")
+                          ?? GetDefaultOutputPath();
+        }
     }
 
     public string Uid { get; } = $"{extension.Uid}JUnitReporter";
@@ -107,6 +114,11 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         _outputPath = path;
+    }
+
+    internal void Enable()
+    {
+        _isEnabled = true;
     }
 
     private static string GetDefaultOutputPath()
