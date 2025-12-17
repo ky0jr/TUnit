@@ -134,4 +134,19 @@ public class JUnitReporterTests
         // Assert
         await Assert.That(reporter.OutputPath).EqualTo(path);
     }
+
+    [Test]
+    public async Task Enable_Should_Enable_Reporter()
+    {
+        // Arrange
+        var extension = new MockExtension();
+        var reporter = new JUnitReporter(extension);
+
+        // Act
+        reporter.Enable();
+        var isEnabled = await reporter.IsEnabledAsync();
+
+        // Assert
+        await Assert.That(isEnabled).IsTrue();
+    }
 }
