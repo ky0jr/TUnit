@@ -117,4 +117,21 @@ public class JUnitReporterTests
         // Assert
         await Assert.That(isEnabled).IsFalse();
     }
+
+    [Test]
+    public async Task SetOutputPath_Should_Set_Output_Path()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable("TUNIT_ENABLE_JUNIT_REPORTER", "true");
+        var extension = new MockExtension();
+        var reporter = new JUnitReporter(extension);
+        var path = Path.Combine("C:", "Temp", "junit.xml");
+
+        // Act
+        reporter.SetOutputPath(path);
+        await reporter.IsEnabledAsync();
+
+        // Assert
+        await Assert.That(reporter.OutputPath).EqualTo(path);
+    }
 }

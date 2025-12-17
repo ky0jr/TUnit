@@ -14,6 +14,8 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
     private string _outputPath = null!;
     private bool _isEnabled;
 
+    internal string OutputPath => _outputPath;
+
     public async Task<bool> IsEnabledAsync()
     {
         // Check if explicitly disabled
